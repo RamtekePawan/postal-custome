@@ -108,14 +108,14 @@ class TrackingMiddleware
         # and not trigger any webhooks.
       end
     end
-
+ 
     # CHANGE: Add query parameters to the link URL before redirecting
-    # modified_url = add_query_params_to_url(link["url"], {
-    #   token: link["token"],
-    #   mId: link["message_id"]
-    # })
+    modified_url = add_query_params_to_url(link["url"], {
+      token: link["token"],
+      mId: link["message_id"]
+    })
     
-    [307, { "Location" => link["url"] }, ["Redirected to: #{link['url']}"]]
+    [307, { "Location" => modified_url }, ["Redirected to: #{modified_url}"]]
   end
 
   def get_message_db_from_server_token(token)
@@ -125,24 +125,25 @@ class TrackingMiddleware
   end
 
   # CHANGE: New method to add query parameters to URL
-  # private def add_query_params_to_url(url, params)
-  #   require 'uri'
+  private def add_query_params_to_url(url, params)
+    require 'uri'
     
-  #   uri = URI.parse(url)
+    uri = URI.parse(url)
     
-  #   # Parse existing query parameters
-  #   existing_params = URI.decode_www_form(uri.query || "").to_h
+    # Parse existing query parameters
+    existing_params = URI.decode_www_form(uri.query || "").to_h
     
-  #   # Merge with new parameters (new params will override existing ones with same keys)
-  #   merged_params = existing_params.merge(params.stringify_keys)
+    # Merge with new parameters (new params will override existing ones with same keys)
+    # merged_params = existing_params.merge(params.stringify_keys)
+    merged_params = existing_params.merge(params.transform_keys(&:to_s))
     
-  #   # Remove any nil values
-  #   merged_params = merged_params.reject { |k, v| v.nil? }
+    # Remove any nil values
+    merged_params = merged_params.reject { |k, v| v.nil? }
     
-  #   # Set the new query string
-  #   uri.query = URI.encode_www_form(merged_params) unless merged_params.empty?
+    # Set the new query string
+    uri.query = URI.encode_www_form(merged_params) unless merged_params.empty?
     
-  #   uri.to_s
-  # end
+    uri.to_s
+  end
 
 end
