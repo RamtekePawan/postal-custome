@@ -489,46 +489,10 @@ module Postal
       def create_link(url)
         hash = Digest::SHA1.hexdigest(url.to_s)
         token = SecureRandom.alphanumeric(16)
-        # CHANGE: Add query parameters to the URL before storing in database
-        modified_url = add_query_params_to_url_to_track_inputs(url, {
-          token: token,
-          mID: id  # 'id' is the message_id in this context
-        })
-  
-        database.insert(:links, { message_id: id, hash: hash, url: modified_url, timestamp: Time.now.to_f, token: token })
+        database.insert(:links, { message_id: id, hash: hash, url: url, timestamp: Time.now.to_f, token: token })
         token
       end
 
-      # CHANGE: Add the helper method to this class
-     private def add_query_params_to_url_to_track_inputs(url, params)
-        require 'uri'
-        
-        puts "[create_link] Adding query params to URL: #{url}"
-        puts "[create_link] Parameters to add: #{params.inspect}"
-        
-        uri = URI.parse(url)
-        
-        # Parse existing query parameters
-        existing_params = URI.decode_www_form(uri.query || "").to_h
-        puts "[create_link] Existing query params: #{existing_params.inspect}"
-        
-        # Merge with new parameters (new params will override existing ones with same keys)
-       merged_params = existing_params.merge(params.transform_keys(&:to_s))
-
-        
-        # Remove any nil values
-        merged_params = merged_params.reject { |k, v| v.nil? }
-        puts "[create_link] Final merged params: #{merged_params.inspect}"
-        
-        # Set the new query string
-        uri.query = URI.encode_www_form(merged_params) unless merged_params.empty?
-        
-        final_url = uri.to_s
-        puts "[create_link] Original URL: #{url}"
-        puts "[create_link] Final URL with params: #{final_url}"
-        
-        final_url
-      end
       #
       # Return a message object that this message is a reply to
       #
