@@ -500,7 +500,7 @@ module Postal
       end
 
       # CHANGE: Add the helper method to this class
-      private def add_query_params_to_url_to_track_inputs(url, params)
+     private def add_query_params_to_url_to_track_inputs(url, params)
         require 'uri'
         
         puts "[create_link] Adding query params to URL: #{url}"
@@ -513,7 +513,8 @@ module Postal
         puts "[create_link] Existing query params: #{existing_params.inspect}"
         
         # Merge with new parameters (new params will override existing ones with same keys)
-        merged_params = existing_params.merge(params.stringify_keys)
+       merged_params = existing_params.merge(params.transform_keys(&:to_s))
+
         
         # Remove any nil values
         merged_params = merged_params.reject { |k, v| v.nil? }
