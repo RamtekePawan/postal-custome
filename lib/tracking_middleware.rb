@@ -115,7 +115,7 @@ class TrackingMiddleware
     #   mId: link["message_id"]
     # })
     
-    [307, { "Location" => modified_url }, ["Redirected to: #{modified_url}"]]
+    [307, { "Location" => link["url"] }, ["Redirected to: #{link['url']}"]]
   end
 
   def get_message_db_from_server_token(token)
